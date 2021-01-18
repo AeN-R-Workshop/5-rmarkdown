@@ -82,6 +82,21 @@ $$ \lim\limits_{v \to \infty} \exp(-\frac{x}{n}) = 0 $$
 date: "`r Sys.Date()`"
 ```
 
+### Some formatted table
+```
+df %>% 
+  round(.,2) %>% 
+  mutate(x = color_tile("white", "green")(x),
+        y = ifelse(y < 5,
+                  cell_spec(y, "html", color = "black", bold = TRUE),
+                  cell_spec(y, "html", color = "grey"))) %>% 
+  kable("html", escape = FALSE, caption = "This is the data you were waiting for.") %>%
+  kable_styling(font_size = 10) %>% 
+  row_spec(0, background = 'lightgrey', bold = TRUE) %>%
+  scroll_box(width = "100%", height = "200px") 
+ ```
+
+
 ### Add date to rendered file
 
 ```{}
