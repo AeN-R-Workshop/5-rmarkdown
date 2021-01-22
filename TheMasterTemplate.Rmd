@@ -1,0 +1,151 @@
+---
+title: "The markdown template"
+subtitle: "a collection of useful markdown code"
+author: "Jan Heuschele"
+date: "`r Sys.Date()`"
+output:
+  bookdown::html_document2:
+    code_folding: hide
+    toc: yes
+    toc_depth: 3
+    toc_float: yes
+    number_sections: false
+editor_options:
+  chunk_output_type: console
+always_allow_html: true
+bibliography: library.bib
+knit: (function(inputFile, encoding) { rmarkdown::render(inputFile, encoding = encoding, output_file = paste0(substr(inputFile,1,nchar(inputFile)-4),Sys.Date(),'.html')) })
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r libraryblock, message=FALSE, warning=FALSE}
+library(tidyverse)
+library(kableExtra)
+library(formattable)
+```
+
+
+## Introduction 
+### My favorite organism (Easy formatting)
+
+Sometimes you want to have things **emphasized** and sometimes you have words like  *species names*.
+
+### Where does it live? (Symbols and Equations)
+It lives at temperatures below 10 ^$\circ$^C  and uses 10^23^ $\mu$g molecules O~2~ h^-1^. Its speed is $v = \frac{v_1*k_1}{3m}$ on a normal day. However on a bad day it is:
+
+$$ \lim\limits_{v \to \infty} \exp(-\frac{x}{n}) = 0 $$
+Equations follow Latex syntax: https://en.wikibooks.org/wiki/LaTeX/Mathematics
+
+
+
+
+## Materials and methods
+Lets include an image of the study animal.
+
+![This is a very weird animal](Bird.JPG){width=70%}
+
+This is another way which lets you reference it later in the text.
+```{r, echo=FALSE, out.width="50%", fig.cap="This is a very weird animal"}
+knitr::include_graphics("Bird.JPG")
+```
+
+
+
+## Results
+Including R code blocks, via a short cut (Mac: Command+shift+I; Windows: Ctrl+alt+I)
+
+```{r calculation1}
+x = seq(1:10)
+x
+y = rnorm(10,7,3)
+y
+```
+
+You can give each chunk options: 
+
+* echo = TRUE and FALSE (show the code yes or no)
+* message = TRUE or FALSE (if the package/function you use prints for example progress messages etc)
+* eval = TRUE or FALSE (should it be used by R or only printed?)
+* warnings = TRUE or FALSE (print warnings from  the code)
+* cache = TRUE (if you have something which takes ages to calculate you can save the output for the next knitting, but be aware of the dark side of it)
+
+
+```{r figure1, fig.height=5, fig.width=5, fig.cap="This shows something."}
+tibble(x=x,y=y) -> df
+t1 = lm(y~x)
+
+df %>% 
+  ggplot(aes(x=x, y =y)) +
+  geom_point() + 
+  geom_smooth() -> p1
+p1
+```
+
+
+You can also refer to the results of your data inside  the text. For example the average X is `r mean(x)`. Or even extract the R^2^ of a simple linear model which in our case is `r summary(t1)$r.squared`.
+
+
+## Discussion 
+
+I guess tables are sometimes useful, so why not use the kable function and some embellishment from the kableExtra package and the formattable package. Caution this does normally does not work well with pdf output. Another option would be the flextable package which seems to be more compabtible with pdf.
+
+```{r table1}
+df %>% 
+  round(.,2) %>% 
+  mutate(x = color_tile("white", "green")(x),
+        y = ifelse(y < 5,
+                  cell_spec(y, "html", color = "black", bold = TRUE),
+                  cell_spec(y, "html", color = "grey"))) %>% 
+  kable("html", escape = FALSE, caption = "This is the data you were waiting for.") %>%
+  kable_styling(font_size = 10) %>% 
+  row_spec(0, background = 'lightgrey', bold = TRUE) %>%
+  scroll_box(width = "100%", height = "200px") 
+ 
+```
+
+
+
+It is not scientific if you do not cite sources like for example your favorite statistical method [@wood2011], or you should always include a random Heuschele et al. [-@heuschele2019] article.
+
+## Tabs {.tabset .tabset-fade .tabset-pills}
+### First tab (lm)
+
+#### Results of a simple linear model
+
+```{r}
+summary(t1)
+```
+
+### First tab (gam)
+
+#### Results of a general additive model
+
+```{r}
+t2 = mgcv::gam(y~x, data = df)
+summary(t2)
+```
+
+
+## Figure and table references within the document
+
+Using bookdown you can also reference figures (Figure \@ref(fig:figure1)) and tables (Table \@ref(tab:table1)). And you can also have some footnotes^[add a footnote here] in your document.
+
+## Interactivity 
+
+We can wrap the plot we produced before to include some interactivity into our html file. 
+
+```{r fig.width = 8, fig.height= 6, message=FALSE}
+library(plotly)
+ggplotly(p1)
+```
+
+
+
+## References
+
+
+
